@@ -28,16 +28,12 @@ so the transform mat are
 
 
 def draw_axis_on_img(img, rot):
+
     assert img.shape == (480, 640, 3)
+
     length = 100
     rotation_mat = rot
     rotation_mat *= length
-    rot_ic = np.asarray([
-        [1, 0, 0],
-        [0, -1, 0],
-        [0, 0, -1]
-    ])
-    rotation_mat = np.dot(rot_ic, rotation_mat)
 
     x_start = (img.shape[1] // 2, img.shape[0] // 2)
     y_start = (img.shape[1] // 2, img.shape[0] // 2)
@@ -49,6 +45,13 @@ def draw_axis_on_img(img, rot):
              y_start[1] + int(rotation_mat[1][1]))
     z_end = (z_start[0] + int(rotation_mat[0][2]),
              z_start[1] + int(rotation_mat[1][2]))
+
+    cv2.putText(img, "pitch", (5, 25),
+                cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+    cv2.putText(img, "yaw", (5, 60),
+                cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+    cv2.putText(img, "pitch", (5, 95),
+                cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2)
 
     # red green blue for the x, y and z axis
     cv2.line(img, x_start, x_end, (0, 0, 255), 2)
