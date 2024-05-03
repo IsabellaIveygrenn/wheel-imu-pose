@@ -16,6 +16,7 @@ import platform
 # import math
 from serial import EIGHTBITS, PARITY_NONE, STOPBITS_ONE
 from util.detectPort import open_port
+from util.realport import read_stream_from_port
 
 
 # 宏定义参数
@@ -57,52 +58,56 @@ serial_ = open_port()
 cap = cv2.VideoCapture(0)
 while isCollected:
 
-    check_head = serial_.read().hex()
-    if check_head != FRAME_HEAD:
-        continue
-    head_type = serial_.read().hex()
-    if (head_type != TYPE_IMU and head_type != TYPE_AHRS and head_type != TYPE_INSGPS and
-        head_type != TYPE_GEODETIC_POS and head_type != 0x50 and head_type != TYPE_GROUND and
-        head_type != TYPE_SYS_STATE and head_type != TYPE_BODY_ACCELERATION and
-            head_type != TYPE_ACCELERATION):
-        continue
-    check_len = serial_.read().hex()
-    # 校验数据类型的长度
-    if head_type == TYPE_IMU and check_len != IMU_LEN:
-        continue
-    elif head_type == TYPE_AHRS and check_len != AHRS_LEN:
-        continue
-    elif head_type == TYPE_INSGPS and check_len != INSGPS_LEN:
-        continue
-    elif head_type == TYPE_GEODETIC_POS and check_len != GEODETIC_POS_LEN:
-        continue
-    elif head_type == TYPE_SYS_STATE and check_len != SYS_STATE_LEN:
-        continue
-    elif head_type == TYPE_GROUND or head_type == 0x50:
-        continue
-    elif head_type == TYPE_BODY_ACCELERATION and check_len != BODY_ACCELERATION_LEN:
-        print("check head type "+str(TYPE_BODY_ACCELERATION) +
-              " failed;"+" check_LEN:"+str(check_len))
-        continue
-    elif head_type == TYPE_ACCELERATION and check_len != ACCELERATION_LEN:
-        print("check head type "+str(TYPE_ACCELERATION) +
-              " failed;"+" ckeck_LEN:"+str(check_len))
-        continue
-    check_sn = serial_.read().hex()
-    head_crc8 = serial_.read().hex()
-    crc16_H_s = serial_.read().hex()
-    crc16_L_s = serial_.read().hex()
-    if head_type == TYPE_AHRS:
-        # print("read the data correctly")
-        data_s = serial_.read(int(AHRS_LEN, 16))
-        AHRS_DATA = struct.unpack('10f ii', data_s[0:48])
-        q_w = AHRS_DATA[6]
-        q_x = AHRS_DATA[7]
-        q_y = AHRS_DATA[8]
-        q_z = AHRS_DATA[9]
-    else:
-        continue
+    # check_head = serial_.read().hex()
+    # if check_head != FRAME_HEAD:
+    #     continue
+    # head_type = serial_.read().hex()
+    # if (head_type != TYPE_IMU and head_type != TYPE_AHRS and head_type != TYPE_INSGPS and
+    #     head_type != TYPE_GEODETIC_POS and head_type != 0x50 and head_type != TYPE_GROUND and
+    #     head_type != TYPE_SYS_STATE and head_type != TYPE_BODY_ACCELERATION and
+    #         head_type != TYPE_ACCELERATION):
+    #     continue
+    # check_len = serial_.read().hex()
+    # # 校验数据类型的长度
+    # if head_type == TYPE_IMU and check_len != IMU_LEN:
+    #     continue
+    # elif head_type == TYPE_AHRS and check_len != AHRS_LEN:
+    #     continue
+    # elif head_type == TYPE_INSGPS and check_len != INSGPS_LEN:
+    #     continue
+    # elif head_type == TYPE_GEODETIC_POS and check_len != GEODETIC_POS_LEN:
+    #     continue
+    # elif head_type == TYPE_SYS_STATE and check_len != SYS_STATE_LEN:
+    #     continue
+    # elif head_type == TYPE_GROUND or head_type == 0x50:
+    #     continue
+    # elif head_type == TYPE_BODY_ACCELERATION and check_len != BODY_ACCELERATION_LEN:
+    #     print("check head type "+str(TYPE_BODY_ACCELERATION) +
+    #           " failed;"+" check_LEN:"+str(check_len))
+    #     continue
+    # elif head_type == TYPE_ACCELERATION and check_len != ACCELERATION_LEN:
+    #     print("check head type "+str(TYPE_ACCELERATION) +
+    #           " failed;"+" ckeck_LEN:"+str(check_len))
+    #     continue
+    # check_sn = serial_.read().hex()
+    # head_crc8 = serial_.read().hex()
+    # crc16_H_s = serial_.read().hex()
+    # crc16_L_s = serial_.read().hex()
+    # if head_type == TYPE_AHRS:
+    #     # print("read the data correctly")
+    #     data_s = serial_.read(int(AHRS_LEN, 16))
+    #     AHRS_DATA = struct.unpack('10f ii', data_s[0:48])
+    #     q_w = AHRS_DATA[6]
+    #     q_x = AHRS_DATA[7]
+    #     q_y = AHRS_DATA[8]
+    #     q_z = AHRS_DATA[9]
+    # else:
+    #     continue
 
+    quat_from_f = read_stream_from_port(serial_)
+    if quat_from_f is None:
+        continue
+    q_x, q_y, q_z, q_w = quat_from_f[0], quat_from_f[1], quat_from_f[2], quat_from_f[3]
     abs_pose = Rotation.from_quat([q_x, q_y, q_z, q_w])
     abs_pose_mat = abs_pose.as_matrix()
 
@@ -129,8 +134,8 @@ while isCollected:
     else:
         frame_axis = draw_axis_on_img(frame, np.identity(3))
 
-    cv2.imshow("video stream", frame_axis)
-    command = cv2.waitKey(3)
+    cv2.imshow("video streamS", frame_axis)
+    command = cv2.waitKey(10)
 
     if command == ord('e'):
         isCollected = False
