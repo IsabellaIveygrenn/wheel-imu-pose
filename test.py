@@ -14,7 +14,7 @@ if __name__ == "__main__":
     # cv2.imshow("hello", img)
     # cv2.waitKey(0)
 
-    rot = Rotation.from_euler("XYZ", [-33, 66, 0], degrees=True).as_matrix()
+    rot = Rotation.from_euler("XYZ", [0, 0, 30], degrees=True).as_matrix()
     rotation_ = copy.deepcopy(rot)
     ans = draw_axis_on_img(img, rotation_)
     print(rot)
@@ -26,6 +26,6 @@ if __name__ == "__main__":
     cv2.imshow("result", ans)
     cv2.waitKey(0)
 
-    z = Rotation.from_quat([0, 0, 0, 1]).as_matrix()
-    # print(z)
-    print(rot)
+    # z = Rotation.from_quat([0, 0, 0, 1]).as_matrix()
+    # # print(z)
+    # print(rot)
