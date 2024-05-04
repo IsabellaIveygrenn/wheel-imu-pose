@@ -15,6 +15,8 @@ if __name__ == "__main__":
     # cv2.waitKey(0)
 
     rot = Rotation.from_euler("XYZ", [-36, 10, 0], degrees=True).as_matrix()
+    rot = Rotation.from_euler("XYZ", [-36, 40, 0], degrees=True).as_matrix()
+
     rotation_ = copy.deepcopy(rot)
     ans = draw_axis_on_img(img, rotation_)
     print(rot)
