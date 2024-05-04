@@ -2,8 +2,6 @@ import cv2
 import numpy as np
 from scipy.spatial.transform import Rotation
 from util.coordinateshow import draw_axis_on_img
-import copy
-
 from util.detectPort import open_port
 from util.realport import read_stream_from_port
 
@@ -11,8 +9,8 @@ from util.realport import read_stream_from_port
 isInitialed = False
 isCollected = True
 
-"""initialization of the r1 state"""
-r1 = np.identity(3)
+"""initialization of the zero state"""
+pose_at_zero = np.identity(3)
 
 
 """
@@ -33,7 +31,7 @@ while isCollected:
     ret, frame = cap.read()
 
     if isInitialed:
-        rel_pose_mat = np.dot(np.linalg.inv(r1), abs_pose_mat)
+        rel_pose_mat = np.dot(np.linalg.inv(abs_pose_mat), pose_at_zero)
         frame_axis = draw_axis_on_img(frame, rel_pose_mat)
     else:
         frame_axis = draw_axis_on_img(frame, np.identity(3))
@@ -44,8 +42,9 @@ while isCollected:
         isCollected = False
     elif command == ord('i'):
         print('begin the calibration')
-        r1 = abs_pose_mat
+        pose_at_zero = abs_pose_mat
         isInitialed = True
+        print(pose_at_zero)
         print('end the calibration')
     else:
         continue
