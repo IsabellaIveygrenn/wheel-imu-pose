@@ -42,6 +42,15 @@ def draw_axis_on_img(img, rot):
     yaw = euler_angel[1]
     roll = euler_angel[2]
 
+    # the code below just for show
+    adjust_matrix = np.asarray([
+        [1, 0, 0],
+        [0, -1, 0],
+        [0, 0, -1]
+    ])
+    rot = np.dot(adjust_matrix, rot)
+    # end of the code
+
     length = 100
     rotation_mat = rot
     rotation_mat *= length
